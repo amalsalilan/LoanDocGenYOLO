@@ -4,7 +4,6 @@ import numpy as np
 from PIL import Image
 import pytesseract
 import openai
-from numpy.linalg import norm
 
 # Set up your OpenAI API key
 openai.api_key = ''
@@ -62,39 +61,12 @@ def save_embeddings(labels, embeddings, output_path='support_set.csv'):
     df = pd.DataFrame({'Label': labels, 'Embedding': embeddings})
     df.to_csv(output_path, index=False)
 
-# Function to apply OCR and get embedding for a test image
-def test(image_path):
-    ocr_data = apply_ocr(image_path)
-    min_x, min_y = ocr_data['left'].min(), ocr_data['top'].min()
-    max_x, max_y = (ocr_data['left'] + ocr_data['width']).max(), (ocr_data['top'] + ocr_data['height']).max()
-    formatted_string = text_to_string_encode(
-        zip(ocr_data['left'], ocr_data['top'], ocr_data['text']),
-        min_x, min_y, max_x, max_y
-    )
-    return get_embedding(formatted_string)
-
-# Function to classify a test embedding
-def classify(test_embedding, model_path='support_set.csv'):
-    model = pd.read_csv(model_path)
-    similarities = []
-
-    for idx, row in model.iterrows():
-        train_embedding = np.array(eval(row['Embedding']))
-        similarity = np.dot(train_embedding, test_embedding) / (norm(train_embedding) * norm(test_embedding))
-        similarities.append((row['Label'], similarity))
-
-    return max(similarities, key=lambda x: x[1])
-
-# Main function to process training data and classify a test image
+# Main function to process training data and generate embeddings
 def main():
-    train_dir = '/home/amal/Documents/gen_ai/v5/dirs/train'  # Specify your train directory path here
+    train_dir = '/home/amal/Documents/gen_ai/main/dirs/'  # Specify your train directory path here
     labels, embeddings = process_directory_structure(train_dir)
     save_embeddings(labels, embeddings)
-
-    test_image_path = '/home/amal/Documents/gen_ai/v5/dirs/main_output_folder/CERTFICATE BY COMPANY SECRETARY REGARDING BORROWING_LIMIT OF THE BOARD OF DIRECTORS/CERTFICATE BY COMPANY SECRETARY REGARDING BORROWING_LIMIT OF THE BOARD OF DIRECTORS_1.jpg'  # Specify your test image path here
-    test_embedding = test(test_image_path)
-    classification = classify(test_embedding)
-    print(f'Classified as: {classification[0]} with confidence {classification[1]:.4f}')
+    print("Training completed and embeddings saved.")
 
 if __name__ == '__main__':
     main()
