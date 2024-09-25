@@ -63,10 +63,21 @@ def save_embeddings(labels, embeddings, output_path='support_set.csv'):
 
 # Main function to process training data and generate embeddings
 def main():
-    train_dir = '/home/amal/Documents/gen_ai/main/dirs/'  # Specify your train directory path here
+    # Get the current script directory and set the main directory as the root
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    main_dir = os.path.abspath(os.path.join(script_dir, '..'))  # Move one level up to reach 'main'
+    
+    # Set the training directory relative to the main directory
+    train_dir = os.path.join(main_dir, 'dirs')  # 'dir' folder inside the main directory
+    
+    # Process the training directory and generate embeddings
     labels, embeddings = process_directory_structure(train_dir)
-    save_embeddings(labels, embeddings)
-    print("Training completed and embeddings saved.")
+    
+    # Save the embeddings as a CSV file in the main directory
+    output_csv = os.path.join(main_dir, 'support_set.csv')
+    save_embeddings(labels, embeddings, output_csv)
+    
+    print(f"Training completed and embeddings saved at {output_csv}")
 
 if __name__ == '__main__':
     main()

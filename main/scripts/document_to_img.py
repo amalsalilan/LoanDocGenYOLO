@@ -3,6 +3,9 @@ import fitz  # PyMuPDF
 from PIL import Image
 import subprocess
 
+script_dir = os.path.dirname(os.path.abspath(__file__))
+main_dir = os.path.abspath(os.path.join(script_dir, '..')) 
+
 def process_pdfs(input_dir, output_dir):
     os.makedirs(output_dir, exist_ok=True)  # Create the main output directory
 
@@ -26,8 +29,8 @@ def process_pdfs(input_dir, output_dir):
                 img.save(image_path)
 
 if __name__ == "__main__":
-    input_directory = "/home/amal/Documents/gen_ai/v5/dirs/verified_documents"
-    output_directory = "/home/amal/Documents/gen_ai/v5/dirs/main_output_folder"
+    input_directory = os.path.join(main_dir, 'dirs', 'classified_documents')
+    output_directory = os.path.join(main_dir, 'dirs', 'pdf_to_image_conversion')
     process_pdfs(input_directory, output_directory)
 
 

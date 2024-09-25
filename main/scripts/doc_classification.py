@@ -75,11 +75,16 @@ def test(pdf_path):
 
 # Main function to classify all PDFs in a folder
 def main():
-    confidence_threshold = 0.4  # Set your confidence threshold here
-    
-    input_folder = '/home/amal/Documents/gen_ai/main/dirs/client/'  # Specify your input folder here
-    verified_output_folder = '/home/amal/Documents/gen_ai/main/dirs/verified_documents/'  # Verified documents output folder
-    unverified_output_folder = '/home/amal/Documents/gen_ai/main/dirs/unverified_documents/'  # Unnecessary documents output folder
+    confidence_threshold = 0.9  # Set your confidence threshold here
+
+    # Get the current script directory and set the main directory as the root
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    main_dir = os.path.abspath(os.path.join(script_dir, '..'))  # Move one level up to reach 'main'
+
+    # Set the folder paths relative to the main directory
+    input_folder = os.path.join(main_dir, 'dirs', 'client_documents')  # Input folder
+    verified_output_folder = os.path.join(main_dir, 'dirs', 'classified_documents')  # Verified documents output folder
+    unverified_output_folder = os.path.join(main_dir, 'dirs', 'unclassified_documents')  # Unverified documents output folder
 
     # Ensure output directories exist
     os.makedirs(verified_output_folder, exist_ok=True)
