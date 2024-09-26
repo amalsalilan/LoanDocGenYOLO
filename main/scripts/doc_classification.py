@@ -1,18 +1,17 @@
 import os
 import pandas as pd
 import numpy as np
-from PIL import Image
+import fitz  # PyMuPDF for PDF handling
 import pytesseract
 import openai
-from pdf2image import convert_from_path
 from numpy.linalg import norm
 import shutil  # For copying files instead of moving
 
 # Set up your OpenAI API key
 openai.api_key = ''
 
-# Configure Tesseract for Ubuntu
-pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+# Configure Tesseract for Windows
+pytesseract.pytesseract.tesseract_cmd = r'C:/Users/aabid/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
 
 # Function to apply OCR
 def apply_ocr(image):
@@ -49,33 +48,36 @@ def classify(test_embedding, model_path='support_set.csv'):
 
     return max(similarities, key=lambda x: x[1])
 
-# Function to convert PDF to images
-def pdf_to_images(pdf_path):
-    return convert_from_path(pdf_path)
+# Function to extract text from PDF using PyMuPDF
+def pdf_to_text(pdf_path):
+    doc = fitz.open(pdf_path)
+    full_text = ""
+    
+    for page_num in range(len(doc)):
+        page = doc.load_page(page_num)
+        full_text += page.get_text("text")  # Extract text in a simple format
+    
+    doc.close()
+    return full_text
 
 # Function to apply OCR and get embedding for a test PDF
 def test(pdf_path):
-    images = pdf_to_images(pdf_path)
-    all_text_embeddings = []
+    # Extract text from PDF using PyMuPDF
+    extracted_text = pdf_to_text(pdf_path)
     
-    for image in images:
-        ocr_data = apply_ocr(image)
-        min_x, min_y = ocr_data['left'].min(), ocr_data['top'].min()
-        max_x, max_y = (ocr_data['left'] + ocr_data['width']).max(), (ocr_data['top'] + ocr_data['height']).max()
-        
-        formatted_string = text_to_string_encode(
-            zip(ocr_data['left'], ocr_data['top'], ocr_data['text']),
-            min_x, min_y, max_x, max_y
-        )
-        embedding = get_embedding(formatted_string)
-        all_text_embeddings.append(embedding)
+    # In case the PDF contains images or has embedded text that requires OCR
+    if not extracted_text.strip():
+        print(f"No text detected in {pdf_path}, consider using OCR.")
+        # Add fallback OCR process if necessary (optional)
     
-    # Return the first embedding for simplicity, assuming one document per PDF
-    return all_text_embeddings[0]
+    # Get embedding of the extracted text
+    embedding = get_embedding(extracted_text)
+    
+    return embedding
 
 # Main function to classify all PDFs in a folder
 def main():
-    confidence_threshold = 0.9  # Set your confidence threshold here
+    confidence_threshold = 0.85  # Set your confidence threshold here
 
     # Get the current script directory and set the main directory as the root
     script_dir = os.path.dirname(os.path.abspath(__file__))
