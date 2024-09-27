@@ -1,3 +1,4 @@
+from collections import Counter
 from ultralytics import YOLO
 import os
 import shutil
@@ -30,6 +31,9 @@ for root, dirs, files in os.walk(main_folder):
         # Counter for saving images with detections
         counter = 1
 
+        # Prepare to collect detection information
+        detection_summary = []
+
         # Iterate through results
         for result in results:
             # Check if the result has detected objects
@@ -41,7 +45,17 @@ for root, dirs, files in os.walk(main_folder):
                     detections_found = True
                 
                 # Save the detected images to the output folder
-                result.save(filename=f"{output_subfolder}/{dir}_page{counter}.jpg")
+                image_file_name = f"{dir}_page{counter}.jpg"
+                result.save(filename=f"{output_subfolder}/{image_file_name}")
+                
+                # Count occurrences of each detected class
+                detected_classes = [model.names[int(cls)] for cls in result.boxes.cls]
+                class_counts = Counter(detected_classes)  # Use Counter to get counts
+                
+                # Prepare the summary for the current image
+                class_summary = ', '.join([f"{count} {cls_name}" for cls_name, count in class_counts.items()])
+                detection_summary.append(f"Image: {image_file_name} - Detected: {class_summary}")
+                
                 counter += 1
 
         # If no detections were found for any images in the folder, move the corresponding document
@@ -65,6 +79,12 @@ for root, dirs, files in os.walk(main_folder):
 
         else:
             print(f"Detections found in folder '{dir}'. Saved to detection folder.")
+            
+            # If there are detections, create a summary text file
+            summary_file_path = os.path.join(output_subfolder, f"detection_summary_{dir}.txt")
+            with open(summary_file_path, 'w') as summary_file:
+                summary_file.write("\n".join(detection_summary))
+            print(f"Detection summary saved to {summary_file_path}.")
 
 # Final completion message
 print("Detection process completed.")

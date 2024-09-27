@@ -75,7 +75,20 @@ def test(pdf_path):
     
     return embedding
 
-# Main function to classify all PDFs in a folder
+# Function to retrieve all document labels in the support set CSV
+def get_support_documents(model_path='support_set.csv'):
+    model = pd.read_csv(model_path)
+    document_list = model['Label'].tolist()  # Assuming the CSV has a 'Label' column for document names/labels
+    return document_list
+
+# Function to get unique support documents, excluding 'detection'
+def get_unique_support_documents(model_path='support_set.csv'):
+    document_list = get_support_documents(model_path)
+    filtered_documents = [doc for doc in document_list if not doc.startswith('detection')]
+    unique_documents = list(set(filtered_documents))
+    return unique_documents
+
+# Main function to classify all PDFs in a folder and store predicted documents
 def main():
     confidence_threshold = 0.85  # Set your confidence threshold here
 
@@ -92,6 +105,12 @@ def main():
     os.makedirs(verified_output_folder, exist_ok=True)
     os.makedirs(unverified_output_folder, exist_ok=True)
 
+    # Get the list of unique documents in the support set
+    unique_support_documents = get_unique_support_documents()
+
+    # Variable to store the predicted document classes (only those above confidence threshold)
+    predicted_documents = []
+
     # Iterate through all files in the input folder
     for file_name in os.listdir(input_folder):
         if file_name.endswith('.pdf'):  # Only process PDFs
@@ -105,6 +124,7 @@ def main():
             detected_label = classification[0]
             confidence = classification[1]
 
+            # Only add the document to the predicted_documents if the confidence is above the threshold
             if confidence > confidence_threshold:
                 print(f'Classified as: {detected_label} with confidence {confidence:.4f}')
                 
@@ -112,12 +132,28 @@ def main():
                 output_pdf_path = os.path.join(verified_output_folder, f'{detected_label}.pdf')
                 shutil.copy(test_pdf_path, output_pdf_path)
                 print(f'Copied the PDF to {output_pdf_path}')
+                
+                # Add the predicted document to the list
+                predicted_documents.append(detected_label)
             else:
                 print(f'Confidence {confidence:.4f} is too low, marking document as unverified.')
                 
                 # Copy the PDF to the unverified documents folder without renaming
                 shutil.copy(test_pdf_path, unverified_output_folder)
                 print(f'Copied the document to {unverified_output_folder}')
+
+   
+    # Compare the predicted documents with the unique support documents
+    missing_documents = set(unique_support_documents) - set(predicted_documents)
+    print("Missing documents:", missing_documents)
+
+    # Save missing documents to a text file in the classified documents folder
+    missing_docs_file = os.path.join(verified_output_folder, 'missing_documents.txt')
+    with open(missing_docs_file, 'w') as f:
+        for doc in missing_documents:
+            f.write(doc + '\n')
+
+    print(f'Missing documents saved to {missing_docs_file}')
 
 if __name__ == '__main__':
     main()

@@ -9,7 +9,7 @@ import openai
 openai.api_key = ''
 
 # Configure Tesseract for Ubuntu
-pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
+pytesseract.pytesseract.tesseract_cmd = r'C:/Users/aabid/AppData/Local/Programs/Tesseract-OCR/tesseract.exe'
 
 # Function to apply OCR
 def apply_ocr(image_path):
@@ -74,7 +74,7 @@ def main():
     labels, embeddings = process_directory_structure(train_dir)
     
     # Save the embeddings as a CSV file in the main directory
-    output_csv = os.path.join(main_dir, 'support_set.csv')
+    output_csv = os.path.join(main_dir, 'scripts/support_set.csv')
     save_embeddings(labels, embeddings, output_csv)
     
     print(f"Training completed and embeddings saved at {output_csv}")
