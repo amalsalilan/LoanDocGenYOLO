@@ -1,0 +1,2 @@
+Image: DEED OF HYPOTHECATION_page1.jpg - Detected: 5 missing_field, 1 missing_date
+Image: DEED OF HYPOTHECATION_page2.jpg - Detected: 1 missing_date, 2 missing_field

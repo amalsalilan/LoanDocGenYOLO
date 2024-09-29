@@ -1,0 +1,6 @@
+Image: MEMORANDUM OF AGREEMENT_page1.jpg - Detected: 2 missing_name, 1 missing_date
+Image: MEMORANDUM OF AGREEMENT_page2.jpg - Detected: 1 missing_field, 1 missing_date
+Image: MEMORANDUM OF AGREEMENT_page3.jpg - Detected: 3 missing_field
+Image: MEMORANDUM OF AGREEMENT_page4.jpg - Detected: 1 missing_field
+Image: MEMORANDUM OF AGREEMENT_page5.jpg - Detected: 2 missing_signature, 1 missing_name, 1 missing_field
+Image: MEMORANDUM OF AGREEMENT_page6.jpg - Detected: 5 missing_field
