@@ -1,0 +1,2 @@
+Image: EXTRACT PROCEEDINGS_page1.jpg - Detected: 6 missing_field
+Image: EXTRACT PROCEEDINGS_page2.jpg - Detected: 1 missing_name, 3 missing_field
