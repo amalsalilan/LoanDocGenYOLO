@@ -101,6 +101,10 @@ def main():
     verified_output_folder = os.path.join(main_dir, 'dirs', 'classified_documents')  # Verified documents output folder
     unverified_output_folder = os.path.join(main_dir, 'dirs', 'unclassified_documents')  # Unverified documents output folder
 
+    # Extract folder names for printing
+    verified_folder_name = os.path.basename(verified_output_folder)
+    unverified_folder_name = os.path.basename(unverified_output_folder)
+
     # Ensure output directories exist
     os.makedirs(verified_output_folder, exist_ok=True)
     os.makedirs(unverified_output_folder, exist_ok=True)
@@ -111,11 +115,17 @@ def main():
     # Variable to store the predicted document classes (only those above confidence threshold)
     predicted_documents = []
 
+    # Set to track classified documents and avoid duplicates
+    classified_documents = set()
+
+    # List to track duplicates and their client-side names
+    duplicates = []
+
     # Iterate through all files in the input folder
     for file_name in os.listdir(input_folder):
         if file_name.endswith('.pdf'):  # Only process PDFs
             test_pdf_path = os.path.join(input_folder, file_name)
-            print(f'Processing: {test_pdf_path}')
+            # print(f'Processing: {file_name}')
             
             # Get the embedding and classify the document
             test_embedding = test(test_pdf_path)
@@ -126,26 +136,34 @@ def main():
 
             # Only add the document to the predicted_documents if the confidence is above the threshold
             if confidence > confidence_threshold:
-                print(f'Classified as: {detected_label} with confidence {confidence:.4f}')
+                # print(f'Classified as: {detected_label} with confidence {confidence:.4f}')
                 
+                # Check if this document was already classified (duplicate)
+                if detected_label in classified_documents:
+                    # print(f"Duplicate detected: '{file_name}' uploaded multiple times.")
+                    duplicates.append(file_name)  # Log the duplicate client-side file name
+                    continue  # Skip this file, do not process further
+
                 # Copy the PDF to the verified documents folder with the detected label as the filename
                 output_pdf_path = os.path.join(verified_output_folder, f'{detected_label}.pdf')
                 shutil.copy(test_pdf_path, output_pdf_path)
-                print(f'Copied the PDF to {output_pdf_path}')
+                # print(f'Copied the PDF to {verified_folder_name}')
+                
+                # Add the detected label to the set of classified documents
+                classified_documents.add(detected_label)
                 
                 # Add the predicted document to the list
                 predicted_documents.append(detected_label)
             else:
-                print(f'Confidence {confidence:.4f} is too low, marking document as unverified.')
+                # print(f'Confidence {confidence:.4f} is too low, marking document as unverified.')
                 
                 # Copy the PDF to the unverified documents folder without renaming
                 shutil.copy(test_pdf_path, unverified_output_folder)
-                print(f'Copied the document to {unverified_output_folder}')
+                # print(f'Copied the document to {unverified_folder_name}')
 
-   
     # Compare the predicted documents with the unique support documents
     missing_documents = set(unique_support_documents) - set(predicted_documents)
-    print("Missing documents:", missing_documents)
+    # print("Missing documents:", missing_documents)
 
     # Save missing documents to a text file in the classified documents folder
     missing_docs_file = os.path.join(verified_output_folder, 'missing_documents.txt')
@@ -153,7 +171,11 @@ def main():
         for doc in missing_documents:
             f.write(doc + '\n')
 
-    print(f'Missing documents saved to {missing_docs_file}')
+    # Print the duplicates that were uploaded multiple times
+    if duplicates:
+        print("\nThe following documents were uploaded multiple times (from client-side names):")
+        for duplicate in duplicates:
+            print(f" - {duplicate}")
 
 if __name__ == '__main__':
     main()
