@@ -1,3 +1,0 @@
-Image: On borrower's letter_page1.jpg - Detected: 6 missing_field, 1 missing_date, 1 missing_name
-Image: On borrower's letter_page2.jpg - Detected: 6 missing_field, 1 missing_name, 1 missing_date
-Image: On borrower's letter_page3.jpg - Detected: 11 missing_field, 1 missing_name

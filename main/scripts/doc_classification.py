@@ -31,7 +31,7 @@ def text_to_string_encode(coordinates, min_x, min_y, max_x, max_y):
 # Function to get embeddings from OpenAI
 def get_embedding(formatted_string):
     response = openai.Embedding.create(
-        model="text-embedding-ada-002",
+        model="text-embedding-3-large",
         input=formatted_string
     )
     return response['data'][0]['embedding']
@@ -90,7 +90,7 @@ def get_unique_support_documents(model_path='support_set.csv'):
 
 # Main function to classify all PDFs in a folder and store predicted documents
 def main():
-    confidence_threshold = 0.85  # Set your confidence threshold here
+    confidence_threshold = 0.75  # Set your confidence threshold here
 
     # Get the current script directory and set the main directory as the root
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -125,7 +125,7 @@ def main():
     for file_name in os.listdir(input_folder):
         if file_name.endswith('.pdf'):  # Only process PDFs
             test_pdf_path = os.path.join(input_folder, file_name)
-            # print(f'Processing: {file_name}')
+            print(f'Processing: {file_name}')
             
             # Get the embedding and classify the document
             test_embedding = test(test_pdf_path)
@@ -136,18 +136,18 @@ def main():
 
             # Only add the document to the predicted_documents if the confidence is above the threshold
             if confidence > confidence_threshold:
-                # print(f'Classified as: {detected_label} with confidence {confidence:.4f}')
+                print(f'Classified as: {detected_label} with confidence {confidence:.4f}')
                 
                 # Check if this document was already classified (duplicate)
                 if detected_label in classified_documents:
-                    # print(f"Duplicate detected: '{file_name}' uploaded multiple times.")
+                    print(f"Duplicate detected: '{file_name}' uploaded multiple times.")
                     duplicates.append(file_name)  # Log the duplicate client-side file name
                     continue  # Skip this file, do not process further
 
                 # Copy the PDF to the verified documents folder with the detected label as the filename
                 output_pdf_path = os.path.join(verified_output_folder, f'{detected_label}.pdf')
                 shutil.copy(test_pdf_path, output_pdf_path)
-                # print(f'Copied the PDF to {verified_folder_name}')
+                print(f'Copied the PDF to {verified_folder_name}')
                 
                 # Add the detected label to the set of classified documents
                 classified_documents.add(detected_label)
@@ -155,15 +155,15 @@ def main():
                 # Add the predicted document to the list
                 predicted_documents.append(detected_label)
             else:
-                # print(f'Confidence {confidence:.4f} is too low, marking document as unverified.')
+                print(f'Confidence {confidence:.4f} is too low, marking document as unverified.')
                 
                 # Copy the PDF to the unverified documents folder without renaming
                 shutil.copy(test_pdf_path, unverified_output_folder)
-                # print(f'Copied the document to {unverified_folder_name}')
+                print(f'Copied the document to {unverified_folder_name}')
 
     # Compare the predicted documents with the unique support documents
     missing_documents = set(unique_support_documents) - set(predicted_documents)
-    # print("Missing documents:", missing_documents)
+    print("Missing documents:", missing_documents)
 
     # Save missing documents to a text file in the classified documents folder
     missing_docs_file = os.path.join(verified_output_folder, 'missing_documents.txt')

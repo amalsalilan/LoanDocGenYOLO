@@ -16,6 +16,9 @@ verified_folder = os.path.join(main_dir, 'dirs', 'classified_documents')  # Veri
 # Load the YOLO model
 model = YOLO(os.path.join(main_dir, 'models', 'train5', 'weights', 'best.pt'))
 
+# Class to exclude from detection (e.g., 'signature')
+class_to_exclude = 'signature'
+
 # Iterate through the main folder
 for root, dirs, files in os.walk(main_folder):
     for dir in dirs:
@@ -36,20 +39,24 @@ for root, dirs, files in os.walk(main_folder):
 
         # Iterate through results
         for result in results:
-            # Check if the result has detected objects
-            if len(result.boxes) > 0:  # If any objects are detected in this image
-                if not detections_found:
-                    # Only create the detection folder if detections are found
-                    output_subfolder = os.path.join(output_folder, f"detection_{dir}")
-                    os.makedirs(output_subfolder, exist_ok=True)
-                    detections_found = True
+            # Get class names of detected objects, excluding the unwanted class
+            detected_classes = [model.names[int(cls)] for cls in result.boxes.cls if model.names[int(cls)] != class_to_exclude]
+
+            # If there are no detections (after filtering out 'signature'), continue to the next result
+            if not detected_classes:
+                continue
+
+            # If we find relevant detections, mark that detections were found
+            if detected_classes:
+                detections_found = True
+                output_subfolder = os.path.join(output_folder, f"detection_{dir}")
+                os.makedirs(output_subfolder, exist_ok=True)
                 
                 # Save the detected images to the output folder
                 image_file_name = f"{dir}_page{counter}.jpg"
                 result.save(filename=f"{output_subfolder}/{image_file_name}")
                 
                 # Count occurrences of each detected class
-                detected_classes = [model.names[int(cls)] for cls in result.boxes.cls]
                 class_counts = Counter(detected_classes)  # Use Counter to get counts
                 
                 # Prepare the summary for the current image

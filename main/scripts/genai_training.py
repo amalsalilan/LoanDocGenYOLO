@@ -30,7 +30,7 @@ def text_to_string_encode(coordinates, min_x, min_y, max_x, max_y):
 # Function to get embeddings from OpenAI
 def get_embedding(formatted_string):
     response = openai.Embedding.create(
-        model="text-embedding-ada-002",
+        model="text-embedding-3-large",
         input=formatted_string
     )
     return response['data'][0]['embedding']

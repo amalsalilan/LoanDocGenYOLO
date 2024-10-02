@@ -1,6 +1,0 @@
-Image: Facility letter_page1.jpg - Detected: 1 signature
-Image: Facility letter_page2.jpg - Detected: 1 signature
-Image: Facility letter_page3.jpg - Detected: 1 signature
-Image: Facility letter_page4.jpg - Detected: 1 signature
-Image: Facility letter_page5.jpg - Detected: 1 signature
-Image: Facility letter_page6.jpg - Detected: 1 signature, 1 missing_field
